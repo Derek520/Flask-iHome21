@@ -1,21 +1,19 @@
 # -*- coding:utf-8 -*-
 
-#  导入Ｆlask包
-from flask import Flask
 
-# 创建Flask应用程序实例对象
-app = Flask(__name__)
-app.debug = True
+from flask_script import Manager
+from flask_migrate import Migrate,MigrateCommand
+from ihome import app, db
 
-# 定义路由以及视图
-@app.route('/index')
-def hello_flask():
-    return 'hello world'
+manager = Manager(app)
 
+Migrate(app, db)
+
+manager.add_command('db',MigrateCommand)
 
 # 运行
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    manager.run()
 
 
 
