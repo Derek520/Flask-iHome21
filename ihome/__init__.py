@@ -8,6 +8,7 @@ from flask_wtf import CSRFProtect
 from flask_session import Session
 import logging
 from logging.handlers import RotatingFileHandler
+from utils.commons import RegexConverter
 
 """
 CSRF保护
@@ -50,6 +51,9 @@ def create_app(config_app):
     # 创建Flask应用程序实例对象
     app = Flask(__name__)
 
+    # 向app添加自定义正则转换器
+    app.url_map.converters['re'] = RegexConverter
+
     # app配置文件导入方法
     app.config.from_object(config_dict[config_app])
 
@@ -71,6 +75,9 @@ def create_app(config_app):
     from ihome.api_1_0 import api  # 为了解决循环导入,放入函数体内当用的时候在再导入
     # 3.注册蓝图
     app.register_blueprint(api,url_prefix='/api/v1_0')
+
+    from ihome.web_html import web_html
+    app.register_blueprint(web_html)
     # print db,2
     return app,db
 
