@@ -2,12 +2,11 @@
 
 from . import api
 from ihome import db
-
+from flask import session
 # 2. 使用蓝图装饰路由
 
-@api.route('/')
-def hello_flask():
-    print db,3
-    return 'hello world'
 
-
+@api.route('/index', methods=['GET', 'POST'])
+def index():
+    session['name']='derek'
+    return 'index'
