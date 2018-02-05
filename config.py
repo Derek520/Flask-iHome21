@@ -7,7 +7,7 @@
 
 class Config(object):
     # 数据库
-    SQLALCHEMY_DATABASE_URI = 'mysql:root:yuan121423@127.0.0.1/ihome'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:yuan121423@127.0.0.1/ihome'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class Development(Config):

@@ -7,6 +7,7 @@ from ihome import db
 
 @api.route('/')
 def hello_flask():
+    print db,3
     return 'hello world'
 
 
