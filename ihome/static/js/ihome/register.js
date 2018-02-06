@@ -47,7 +47,7 @@ function sendSMSCode() {
         $(".phonecode-a").attr("onclick", "sendSMSCode();");
         return;
     }
-    $.get("/api/smscode", {mobile:mobile, code:imageCode, codeId:imageCodeId}, 
+    $.get("/api/v1_0/sms_codes", {mobile:mobile, code:imageCode, codeId:imageCodeId},
         function(data){
             if (0 != data.errno) {
                 $("#image-code-err span").html(data.errmsg); 
@@ -117,5 +117,15 @@ $(document).ready(function() {
             $("#password2-err").show();
             return;
         }
+
+        // var csrf_token = $('input[name="csrf_token"]').val()
+        // alert(csrf_token)
+        // // 组织参数
+        // var params = {'mobile': mobile, 'pphoneCode': phoneCode,
+        //             'X- CSRFToken':csrf_token}
+        // //
+        // $.post('/api/v1_0/users',params,function (data) {
+        //     alert(data.errcode)
+        // })
     });
 })

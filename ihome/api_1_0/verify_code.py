@@ -57,13 +57,14 @@ GET /api/v1_0/sms_codes/17612345678?image_code=werz&image_code_id=61242
 图像验证码的编码
 """
 
-
-@api.route('/sms_codes/<re(r"1[356789]\d{9}"):moble>')
-def send_sms_code(moble):
+# <re(r"1[356789]\d{9}"):moble>
+@api.route('/sms_codes')
+def send_sms_code():
     print 'send_code'
     # 1. 获取参数
-    image_code = request.args.get('image_code')
-    image_code_id =request.args.get('image_code_id')
+    moble = request.args.get('mobile')
+    image_code = request.args.get('code')
+    image_code_id =request.args.get('codeId')
     print image_code_id,image_code
     # 2. 校验
     # 验证参数完整性
