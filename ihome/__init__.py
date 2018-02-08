@@ -61,7 +61,7 @@ def create_app(config_app):
     db.init_app(app)
 
     # CSRF保护 传入app
-    CSRFProtect(app)
+    # CSRFProtect(app)
     # db = SQLAlchemy(app)
 
     # 创建redis
@@ -79,5 +79,5 @@ def create_app(config_app):
     from ihome.web_html import web_html
     app.register_blueprint(web_html)
     # print db,2
-    return app,db
+    return app, db
 

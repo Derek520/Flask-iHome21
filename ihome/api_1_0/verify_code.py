@@ -26,6 +26,8 @@ from ihome.libs.yuntongxin.sms import CCP
 @api.route('/image_codes/<image_code_id>')
 def get_image_code(image_code_id):
 
+
+
     # 1.生成验证码
     # name,text,image_data = captcha.generate_captcha()
     name, text, image_data = captcha.generate_captcha()
@@ -145,7 +147,7 @@ def send_sms_code(moble):
     # 调用云通信发送短信验证码
     ccp = CCP()
     try:
-        status_code = ccp.send_template_sms(17710928803,[send_code,5],1)
+        status_code = ccp.send_template_sms(moble,[send_code,5],1)
     except Exception as e:
         logging.error(e)
         res = {
