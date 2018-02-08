@@ -38,7 +38,7 @@ def get_image_code(image_code_id):
         logging.error(e)
 
         res = {
-            'errcode':RET.DBERR,
+            'errno':RET.DBERR,
             'errmsg':'redis存储错误'
         }
 
@@ -57,20 +57,20 @@ GET /api/v1_0/sms_codes/17612345678?image_code=werz&image_code_id=61242
 图像验证码的编码
 """
 
-# <re(r"1[356789]\d{9}"):moble>
-@api.route('/sms_codes')
-def send_sms_code():
+# 
+@api.route('/sms_codes/<re(r"1[356789]\d{9}"):moble>')
+def send_sms_code(moble):
     print 'send_code'
     # 1. 获取参数
-    moble = request.args.get('mobile')
-    image_code = request.args.get('code')
-    image_code_id =request.args.get('codeId')
-    print image_code_id,image_code
+    # moble = request.args.get('mobile')
+    image_code = request.args.get('image_code')
+    image_code_id =request.args.get('image_code_id')
+    print image_code_id,image_code,moble
     # 2. 校验
     # 验证参数完整性
     if not all([image_code_id,image_code]):
         res = {
-            'errcode':RET.PARAMERR,
+            'errno':RET.PARAMERR,
             'errmsg': '参数不完整'
         }
         return jsonify(res)
@@ -83,7 +83,7 @@ def send_sms_code():
     except Exception as e:
         logging.error(e)
         res = {
-            'errcode':RET.DBERR,
+            'errno':RET.DBERR,
             'errmsg':'获取redis数据失败'
         }
         return jsonify(res)
@@ -91,7 +91,7 @@ def send_sms_code():
         # 如果查到数据,判断是否None
         if data is None:
             res = {
-                'errcode':RET.NODATA,
+                'errno':RET.NODATA,
                 'errmsg':'验证码过期或已删除'
             }
             return jsonify(res)
@@ -108,7 +108,7 @@ def send_sms_code():
     # 对比是否一致, 不一致就返回 --> 转换相同格式再对比
     if image_code.lower() != data.lower():
         res = {
-            'errcode':RET.PARAMERR,
+            'errno':RET.PARAMERR,
             'errmsg':'验证码过期或已删除,请刷新验证码'
         }
         return jsonify(res)
@@ -123,7 +123,7 @@ def send_sms_code():
     else:
         if user is not None:
             res = {
-                'errcode':RET.DATAEXIST,
+                'errno':RET.DATAEXIST,
                 'errmsg': '用户已存在'
             }
             return jsonify(res)
@@ -137,7 +137,7 @@ def send_sms_code():
     except Exception as e:
         logging.error(e)
         res = {
-            'errcode':RET.DBERR,
+            'errno':RET.DBERR,
             'errmsg': 'redis数据库存储失败'
         }
         return jsonify(res)
@@ -149,7 +149,7 @@ def send_sms_code():
     except Exception as e:
         logging.error(e)
         res = {
-            'errcode':RET.THIRDERR,
+            'errno':RET.THIRDERR,
             'errmsg':'短信验证码发送失败'
         }
         return jsonify(res)
@@ -157,7 +157,7 @@ def send_sms_code():
     else:
         if status_code == '000000':
             res = {
-                'errcode':RET.OK,
+                'errno':RET.OK,
                 'errmsg': '验证码发送成功'
             }
             return jsonify(res)
