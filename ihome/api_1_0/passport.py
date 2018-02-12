@@ -6,6 +6,7 @@ import re,logging
 from ihome.models import User
 from ihome import redis_store,db
 
+
 # POST /avi/v1_0/users/
 # 手机号   mobile
 # 短信验证码 sms_code
@@ -90,7 +91,7 @@ def register():
             return jsonify(errno=RET.DATAEXIST,errmsg='用户已存在')
 
         user = User(name=mobile,mobile=mobile)
-        user.password_hash=password
+        user.password=password
         try:
             db.session.add(user)
             db.session.commit()
@@ -134,8 +135,10 @@ JSON
 @api.route('/sessions', methods=['POST'])
 def sessions():
     # 1.获取参数
-    username = request.get_json('username')
-    password = request.get_json('password')
+    request_json = request.get_json()
+    username = request_json.get('username')
+    password = request_json.get('password')
+    print username,password
     # 2.校验参数
     # 校验完整性
     if not all([username,password]):
@@ -144,7 +147,7 @@ def sessions():
     # 进行登录次数限制
     # 查询redis数据库,登录了多少次
     # 用ip 进行统计
-    ip = request.remote_addr()
+    ip = request.remote_addr
     try:
         count = redis_store.get('erro_count_'+ip)
     except Exception as e:
@@ -154,24 +157,43 @@ def sessions():
     if count is not None and int(count)>=5:
         return jsonify(erron=RET.DATAERR,errmsg='已超出最大连续登录次数,请稍后登录')
 
+
     try:
-        user = User.query.filter_by(name=username).first()
+        user = User.query.filter_by(mobile=username).first()
     except Exception as e:
         logging.error(e)
-        return jsonify(erron=RET.DBERR,errmsg='查询数据库错误')
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
 
+    # 3. 如果登录不对, 应该设置redis的错误次数. 同时如果登录正确, 清除redis的错误次数
+
+    # 账号或密码错误, 需要返回
+    # 登录的逻辑, 一定是账号或密码错误
 
     # 判断用户名和密码是否正确
-    if user != username or user.check_password(password):
+    pas = user.check_password(password)
+    print user,pas
+    if user is None or not user.check_password(password):
         # 设置错误次数
         try:
-            redis_store.incr('erro_count_'+ip)
+            redis_store.incr('erro_count_'+ ip)
+            # 设置redsi限制时间
+            redis_store.expire('erro_count_'+ ip)
         except Exception as e:
             logging.error(e)
-
-
         return jsonify(erron=RET.DATAERR,errmsg='用户名或密码错误')
 
+    # 如果手机号和密码都成功,说明登录成功,需要清楚限制
+    # 清楚redis数据的限制
+    try:
+        redis_store.delete('erro_count_'+ ip)
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.DBERR,errmsg='清除redis数据库失败')
+
+    # 记录用户登录状态
+    session['user_id']=user.id
+    session['mobile']=user.mobile
+    session['user_name']=user.name
 
     # 4.返回数据
-    return 'sessions'
+    return jsonify(errno=RET.OK,errmsg='OK')

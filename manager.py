@@ -21,7 +21,7 @@ manager.add_command('db',MigrateCommand)
 # 运行
 if __name__ == '__main__':
     # manager启动
-    print app.url_map
+    # print app.url_map
     manager.run()
 
 
