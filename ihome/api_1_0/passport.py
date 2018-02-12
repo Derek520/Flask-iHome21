@@ -197,3 +197,29 @@ def sessions():
 
     # 4.返回数据
     return jsonify(errno=RET.OK,errmsg='OK')
+
+'''
+检验用户登录
+URL:
+api/v1_0/sessions
+请求方式
+GET
+接收数据
+session.get(user_id)
+接收数据格式
+POST
+返回数据格式
+JSON
+
+'''
+
+@api.route('/sessions',methods=['GET'])
+def check_login():
+    # 1.获取session中的用户名
+    user_name = session.get('user_name')
+    # 2.判断是否存在
+    # 如果session中数据name名字存在，则表示用户已登录，否则未登录
+    if user_name is not None:
+        return jsonify(errno=RET.OK,errmsg='用户已登录')
+    else:
+        return jsonify(errno=RET.SESSIONERR,errmsg='用户未登录')
