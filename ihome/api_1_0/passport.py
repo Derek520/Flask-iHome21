@@ -5,6 +5,7 @@ from ihome.utils.response_code import RET
 import re,logging
 from ihome.models import User
 from ihome import redis_store,db
+from ihome.utils.commons import login_required
 
 
 # POST /avi/v1_0/users/
@@ -207,7 +208,7 @@ GET
 接收数据
 session.get(user_id)
 接收数据格式
-POST
+JSON
 返回数据格式
 JSON
 
@@ -220,6 +221,34 @@ def check_login():
     # 2.判断是否存在
     # 如果session中数据name名字存在，则表示用户已登录，否则未登录
     if user_name is not None:
-        return jsonify(errno=RET.OK,errmsg='用户已登录')
+        return jsonify(errno=RET.OK,errmsg='用户已登录',data={'name':user_name})
     else:
         return jsonify(errno=RET.SESSIONERR,errmsg='用户未登录')
+
+
+'''
+用户退出
+
+URL:
+api/v1_0/sessions
+请求方式
+DELETE
+接收数据
+
+接收数据格式
+JSON
+返回数据格式
+JSON
+'''
+
+# 用户在退出之前,必须是登录状态,所以要进行用户登录判断
+@api.route('/sessions',methods=['DELETE'])
+@login_required
+def cler_login():
+    # 用户退出登录,就是清除session
+    # 在清除之前需要先保存csrf_token,因为redis和浏览器是互相同步的,删除任何一个,另一个也会同时删除
+    csrf_token = session.get('csrf_token')
+    session.clear()
+    session['csrf_token'] = csrf_token
+    # 返回结果
+    return jsonify(errno=RET.OK,errmsg='退出成功')
