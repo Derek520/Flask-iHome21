@@ -61,7 +61,7 @@ def create_app(config_app):
     db.init_app(app)
 
     # CSRF保护 传入app
-    # CSRFProtect(app)
+    CSRFProtect(app)
     # db = SQLAlchemy(app)
 
     # 创建redis
@@ -72,7 +72,8 @@ def create_app(config_app):
     # Flask-Session扩展包,可以讲cookie中的session信息同步到redis数据库中
     Session(app)
 
-    from ihome.api_1_0 import api  # 为了解决循环导入,放入函数体内当用的时候在再导入
+    # 为了解决循环导入,放入函数体内当用的时候在再导入
+    from ihome.api_1_0 import api
     # 3.注册蓝图
     app.register_blueprint(api,url_prefix='/api/v1_0')
 
