@@ -4,6 +4,7 @@ from datetime import datetime
 from ihome import db
 from werkzeug.security import generate_password_hash,check_password_hash
 # app, db = create_app('develop')
+from ihome.utils import constants
 
 class BaseModel(object):
     """模型基类，为每个模型补充创建时间与更新时间"""
@@ -46,6 +47,17 @@ class User(BaseModel, db.Model):
     def check_password(self, value):
         """检查用户密码， value 是用户填写密码"""
         return check_password_hash(self.password_hash, value)
+
+    def to_dict(self):
+        """将对象转换为字典数据"""
+        user_dict = {
+            "user_id":self.id,
+            "name":self.name,
+            "mobile":self.mobile,
+            "avatar":constants.QINIU_URL_DOMAIN + self.avatar_url if self.avatar_url else '',
+            "create_time":self.create_time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return user_dict
 
 
 class Area(BaseModel, db.Model):

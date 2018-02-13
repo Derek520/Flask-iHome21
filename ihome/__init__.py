@@ -61,7 +61,7 @@ def create_app(config_app):
     db.init_app(app)
 
     # CSRF保护 传入app
-    CSRFProtect(app)
+    # CSRFProtect(app)
     # db = SQLAlchemy(app)
 
     # 创建redis

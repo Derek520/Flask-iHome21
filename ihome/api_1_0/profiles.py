@@ -170,6 +170,19 @@ def update_name():
 @login_required
 def get_user_profiles():
     '''个人信息获取'''
+    # 1.获取用户id
+    user_id = g.user_id
 
+    # 2.查询数据库
+    try:
+        user = User.query.filter_by(id=user_id).first()
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.DBERR,errmsg='数据库查询失败')
 
-    return 'get_user_profiles'
+    # 查询的数据不能为空
+    if user is None:
+        return jsonify(errno=RET.NODATA,errmsg='用户不存在')
+
+    # 3.返回数据
+    return jsonify(errno=RET.OK,errmsg='ok',data=user.to_dict())
