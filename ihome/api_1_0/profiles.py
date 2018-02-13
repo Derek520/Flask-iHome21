@@ -186,3 +186,52 @@ def get_user_profiles():
 
     # 3.返回数据
     return jsonify(errno=RET.OK,errmsg='ok',data=user.to_dict())
+
+
+# 实名认证
+@api.route('/users/auth', methods=['POST'])
+@login_required
+def set_users_auth():
+    '''实名认证'''
+    user_id =g.user_id
+
+    resp_data = request.get_json()
+
+    if resp_data is None:
+        return jsonify(errno=RET.NODATA,errmsg='参数不完整')
+
+    real_name = resp_data.get('real_name')
+    id_card = resp_data.get('id_card')
+
+    # 参数校验
+    if not all([real_name,id_card]):
+        return jsonify(errno=RET.PARAMERR,errmsg='参数错误')
+
+    # 存储数据库
+    try:
+        User.query.filter_by(id=user_id,real_name=None,id_card=None)\
+            .update({'real_name':real_name,'id_card':id_card})
+        db.session.commit()
+    except Exception as e:
+        logging.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR,errmsg='数据库更新失败')
+    return jsonify(errno=RET.OK,errmsg='实名认证成功')
+
+# 获取实名认证信息
+@api.route('/users/auth',methods=['GET'])
+@login_required
+def get_users_auth():
+    '''获取实名认证信息'''
+    user_id = g.user_id
+    # 查询数据库
+    try:
+        user = User.query.filter_by(id=user_id).first()
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='数据库查询失败')
+
+    if user is None:
+        return jsonify(errno=RET.PARAMERR,errmsg='用户不存在')
+
+    return jsonify(errno=RET.OK,errmsg='OK',data=user.auth_dict())
