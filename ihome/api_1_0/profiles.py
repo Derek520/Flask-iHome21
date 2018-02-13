@@ -132,4 +132,44 @@ def set_user_avatars():
     # 如果还需要额外的返回数据, 可以再后方自行拼接数据, 一般会封装成一个字典返回额外数据
     return jsonify(errno=RET.OK, errmsg='保存图像成功', data={"avatar_url": avatar_url})
 
+@api.route('/users/name',methods=['PUT'])
+@login_required
+def update_name():
+    '''修改用户名'''
+    # 获取用户id,因为登录的时候将用户id保存在了g变量,为了减少查询redis数据库次数
+    user_id = g.user_id
 
+    # 获取用户要设置的用户名
+    req_data =request.get_json()
+
+    # 判断数据完整性
+    if req_data is None:
+        return jsonify(errno=RET.PARAMERR,errmsg='参数不完整')
+
+    # 查询提交的表单数据姓名:
+    name = req_data.get('name')
+    # 如果为none说明,姓名为空
+    if name is None:
+        return jsonify(errno=RET.NODATA,errmsg='用户名不能为空')
+
+    # 将修改的姓名更新到mysql数据库中
+    try:
+        User.query.filter_by(id=user_id).update({'name':name})
+        db.session.commit()
+    except Exception as e:
+        logging.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR,errmsg='用户名保存失败')
+
+    session['user_name']=name
+
+    return jsonify(errno=RET.OK,errmsg='用户名修改成功',data={'name':name})
+
+# 个人信息获取
+@api.route('/users',methods=['GET'])
+@login_required
+def get_user_profiles():
+    '''个人信息获取'''
+
+
+    return 'get_user_profiles'
