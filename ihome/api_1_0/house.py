@@ -38,9 +38,14 @@ def get_areas():
     except Exception as e:
         logging.error(e)
         area_json = None
+
+
     # 二.读取数据库信息
     # 如果为None说明没有缓存数据,需要查询数据库
+    print '缓存数据'
+
     if area_json is None:
+        print '数据库数据'
         try:
             # 查询全部数据
             area_info = Area.query.all()
@@ -54,6 +59,7 @@ def get_areas():
         # 在存入redsi数据库前需要进行转换
         # 为了将来读取方便, 在存入redis的时候, 将数据转为JSON字符串
         area_json =json.dumps(area_json)
+
         # 三.查询到的数据存储到redis中
         try:
             # 存储到redis数据中
@@ -61,6 +67,9 @@ def get_areas():
         except Exception as e:
             logging.error(e)
             return jsonify(erron=RET.DBERR,errmsg='redis设置失败')
+
+
+
     # 四.返回结果
     # return jsonify(erron=RET.OK,errmsg='成功',data={'area':area_json})
     # 不能再次进行转换,需要拼接原始
