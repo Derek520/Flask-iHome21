@@ -73,7 +73,8 @@ def get_areas():
     # 四.返回结果
     # return jsonify(erron=RET.OK,errmsg='成功',data={'area':area_json})
     # 不能再次进行转换,需要拼接原始
-    return '{"erron":0, "errmsg":"成功","data": %s}' % area_json,200, {"Content-type":"application/json"}
-
+    # return '{"erron":0, "errmsg":"成功","data": %s}' % area_json,200, {"Content-type":"application/json"}
+    # 响应头交给请求钩子处理
+    return '{"erron":0, "errmsg":"成功","data": %s}' % area_json
 
 
