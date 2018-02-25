@@ -12,7 +12,7 @@ class Config(object):
 
     # SECRET_KEY = 'JJJ'
     # 配置redis的数据
-    REDIS_HOST = ''
+    REDIS_HOST = '47.94.238.54'
     REDIS_PORT = 6379
 
     # 配置SECREK_KEY
