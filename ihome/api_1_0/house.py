@@ -6,7 +6,7 @@ from flask import request,jsonify,json,g
 from ihome import redis_store,db
 from ihome.utils.commons import RET
 from ihome.models import Area,House,HouseImage,Facility
-from ihome.utils.constants import AREA_INFO_REDIS_EXPIRES,QINIU_URL_DOMAIN
+from ihome.utils.constants import AREA_INFO_REDIS_EXPIRES,QINIU_URL_DOMAIN,HOME_PAGE_MAX_HOUSES
 from ihome.utils.commons import login_required
 from ihome.utils.image_storage import storage
 '''
@@ -240,5 +240,47 @@ def save_house_image():
     return jsonify(errno=RET.OK,errmsg='成功',data={'image_url':image_url})
 
 
+# 获取首页轮播图
+@api.route('/houses/index')
+@login_required
+def get_houses_index():
+    '''获取首页轮播'''
+    print 456
+    # 1.先从缓存中获取
+    try:
+        house_index = redis_store.get('home_page_data')
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.OK,errmsg='查询redis失败')
 
+    print house_index
+    if house_index:
+        return '{"errno":0,"errmsg":"成功","data":%s}' % house_index
 
+    # 2.若没有从数据库查询,只要前排序前5条数据
+    try:
+        houses = House.query.order_by(House.order_count.desc()).limit(HOME_PAGE_MAX_HOUSES)
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.DBERR,errmsg='查询数据库失败')
+
+    if houses is None:
+        return jsonify(errno=RET.PARAMERR,errmsg='没有数据')
+
+    house_list = []
+    for house in houses:
+        if not house.index_image_url:
+            continue
+        house_list.append(house.to_base_dict())
+    # 转换为json数据,保存到redis
+    house_json = json.dumps(house_list)
+    # 存入redis数据库
+    try:
+        redis_store.setex('home_page_data',AREA_INFO_REDIS_EXPIRES,house_json)
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.OK,errmsg='redis数据库失败')
+
+    print house_json
+    # 3.返回数据
+    return '{"errno":0,"errmsg":"成功","data":%s}' % house_json

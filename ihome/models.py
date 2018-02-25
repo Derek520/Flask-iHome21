@@ -138,6 +138,8 @@ class House(BaseModel, db.Model):
             "ctime": self.create_time.strftime("%Y-%m-%d")
         }
         return house_dict
+
+
 class Facility(BaseModel, db.Model):
     """设施信息"""
 
