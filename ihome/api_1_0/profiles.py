@@ -16,7 +16,7 @@ from ihome.utils.commons import login_required
 from flask import request, jsonify, g, session, current_app
 from ihome.utils.response_code import RET
 from ihome.utils.image_storage import storage
-from ihome.models import User
+from ihome.models import User,House
 from ihome import db
 from ihome.utils import constants
 
@@ -235,3 +235,29 @@ def get_users_auth():
         return jsonify(errno=RET.PARAMERR,errmsg='用户不存在')
 
     return jsonify(errno=RET.OK,errmsg='OK',data=user.auth_dict())
+
+
+# 获取房东发布的房屋信息
+@api.route('/users/houses')
+@login_required
+def get_user_houses():
+    '''获取房东发布的房源'''
+    # 1.获取用户id
+    # 通过g变量获取用户id
+    user_id = g.user_id
+    # 2.查询数据库数据
+    try:
+        houses = House.query.filter(House.user_id==user_id).all()
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.DBERR,errmsg='查询数据失败')
+
+    if houses is None:
+        return jsonify(errno=RET.PARAMERR,errmsg='没有房屋信息')
+    print houses
+    # 将查询到的房屋信息转换为字典存放到列表中
+    houses_list = []
+    for house in houses:
+        houses_list.append(house.to_base_dict())
+    # 3.返回数据
+    return jsonify(errno=RET.OK,errmsg='成功',data={'houses':houses_list})

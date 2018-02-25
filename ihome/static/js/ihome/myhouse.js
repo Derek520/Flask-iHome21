@@ -10,6 +10,14 @@ $(document).ready(function(){
                 $(".auth-warn").show();
                 return;
             }
+            // 已认证的用户，请求其之前发布的房源信息
+            $.get("/api/v1_0/users/houses", function(resp){
+                if (resp.errno == 0) {
+                    $("#houses-list").html(template("houses-list-tmpl", {houses:resp.data.houses}));
+                } else {
+                    $("#houses-list").html(template("houses-list-tmpl", {houses:[]}));
+                }
+            });
         }
     });
 })

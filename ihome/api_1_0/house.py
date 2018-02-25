@@ -240,5 +240,5 @@ def save_house_image():
     return jsonify(errno=RET.OK,errmsg='成功',data={'image_url':image_url})
 
 
-# 获取房东发布的房屋信息
+
 

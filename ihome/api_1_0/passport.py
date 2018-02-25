@@ -33,7 +33,7 @@ from ihome.utils.commons import login_required
 
 @api.route('/users', methods=['POST'])
 def register():
-    #
+    # 用户注册
     print 456789
     # # 获取数据
     # mobile = request.args.get('mobile')
