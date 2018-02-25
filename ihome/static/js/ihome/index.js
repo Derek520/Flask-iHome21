@@ -73,7 +73,7 @@ $(document).ready(function(){
     // 获取幻灯片要展示的房屋基本信息
     $.get("/api/v1_0/houses/index", function(resp){
         if (resp.errno == 0) {
-            alert(resp.data)
+
             $(".swiper-wrapper").html(template("swiper-houses-tmpl", {houses:resp.data}));
 
             // 设置幻灯片对象，开启幻灯片滚动

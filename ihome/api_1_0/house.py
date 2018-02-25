@@ -2,7 +2,7 @@
 
 import logging
 from . import api
-from flask import request,jsonify,json,g
+from flask import request,jsonify,json,g,session
 from ihome import redis_store,db
 from ihome.utils.commons import RET
 from ihome.models import Area,House,HouseImage,Facility
@@ -242,7 +242,7 @@ def save_house_image():
 
 # 获取首页轮播图
 @api.route('/houses/index')
-@login_required
+# @login_required
 def get_houses_index():
     '''获取首页轮播'''
     print 456
@@ -284,3 +284,66 @@ def get_houses_index():
     print house_json
     # 3.返回数据
     return '{"errno":0,"errmsg":"成功","data":%s}' % house_json
+
+# 获取房屋详情页
+@api.route('/houses/<int:house_id>')
+# @login_required
+def get_houses_info(house_id):
+    '''获取房屋详情'''
+    # 前端在房屋详情页面展示时，如果浏览页面的用户不是该房屋的房东，则展示预定按钮，否则不展示，
+    # 所以需要后端返回登录用户的user_id
+    # 尝试获取用户登录的信息，若登录，则返回给前端登录用户的user_id，否则返回user_id=-1
+    # 1.获取参数
+    # user_id=g.user_id
+
+    user_id =session.get('user_id','-1')
+
+    print user_id
+    # print user_id,user_id2
+    # 2.参数校验
+    if not house_id:
+        return jsonify(errno=RET.USERERR,errmsg='参数缺失')
+
+    # 3.逻辑处理
+    # 先查询redis缓存
+    try:
+        house_info = redis_store.get('house_info_%s' % house_id)
+    except Exception as e:
+        logging.error(e)
+        # return jsonify(errno=RET.DBERR,errmsg='查询redis失败')
+        house_info=None
+
+    # 判断缓存数据是否为空
+    if house_info:
+        return '{"errno":0,"errmsg":"成功","data":{"user_id":%s,"house":%s}}' % (user_id,house_info)
+
+    # 查询数据库
+    try:
+        # house_data = House.query.filter(House.id==house_id).frist()
+        house = House.query.get(house_id)
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.DBERR,errmsg='查询数据失败')
+
+    if not house:
+        return jsonify(errno=RET.NODATA,errmsg='房屋不存在')
+
+    print house.to_full_dict
+    # 将房屋对象数据转换为字典
+    try:
+        house_data = house.to_full_dict()
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.PARAMERR,errmsg='数据转换失败')
+
+    # 将字典数据转换成json数据
+    house_json =json.dumps(house_data)
+
+    # 存入redis数据库
+    try:
+        redis_store.setex('house_info_%s' % house_id,AREA_INFO_REDIS_EXPIRES,house_json)
+    except Exception as e:
+        logging.error(e)
+        return jsonify(errno=RET.DBERR,errmsg='设置redis失败')
+    print 456
+    return '{"errno":0,"errmsg":"成功","data":{"user_id":%s,"house":%s}}' % (user_id, house_json)

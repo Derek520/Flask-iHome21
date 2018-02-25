@@ -17,7 +17,7 @@ from flask import request, jsonify, g, session, current_app
 from ihome.utils.response_code import RET
 from ihome.utils.image_storage import storage
 from ihome.models import User,House
-from ihome import db
+from ihome import db,redis_store
 from ihome.utils import constants
 
 
@@ -162,6 +162,8 @@ def update_name():
         return jsonify(errno=RET.DBERR,errmsg='用户名保存失败')
 
     session['user_name']=name
+
+    redis_store.flushall()
 
     return jsonify(errno=RET.OK,errmsg='用户名修改成功',data={'name':name})
 
