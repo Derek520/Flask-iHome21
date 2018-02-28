@@ -4,7 +4,7 @@ from flask import Blueprint
 # 1. 创建蓝图对象, 导入子模块
 api = Blueprint('api',__name__)
 
-import index,passport,profiles,verify_code,house
+import index,passport,profiles,verify_code,house,order
 
 # 请求钩子
 @api.after_request

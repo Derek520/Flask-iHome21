@@ -68,6 +68,7 @@ $(document).ready(function(){
             // 表示用户未登录
             $(".top-bar>.register-login").show();
         }
+
     }, "json");
 
     // 获取幻灯片要展示的房屋基本信息

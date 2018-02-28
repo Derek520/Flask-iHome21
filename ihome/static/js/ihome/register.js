@@ -160,4 +160,4 @@ $(document).ready(function() {
             }
         })
     });
-})
+});
